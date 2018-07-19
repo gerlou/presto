@@ -110,7 +110,7 @@ public class TestScalarValidation
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Method .* has parameter with wrapper type Boolean that is missing @SqlNullable")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Method .* has parameter expected to use USE_NULL_FLAG or RETURN_NULL_ON_NULL null convention. Parameter type is unexpected: Boolean")
     public void testPrimitiveWrapperParameterWithoutNullable()
     {
         extractScalars(PrimitiveWrapperParameterWithoutNullable.class);
@@ -126,7 +126,7 @@ public class TestScalarValidation
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Method .* has parameter with primitive type double annotated with @SqlNullable")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Method .* annotated with @SqlNullable has primitive return type: double")
     public void testPrimitiveParameterWithNullable()
     {
         extractScalars(PrimitiveParameterWithNullable.class);
@@ -191,22 +191,6 @@ public class TestScalarValidation
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Method .* has parameter annotated with @Nullable but not @SqlNullable")
-    public void testParameterWithLegacyNullable()
-    {
-        extractScalars(ParameterWithLegacyNullable.class);
-    }
-
-    public static final class ParameterWithLegacyNullable
-    {
-        @ScalarFunction
-        @SqlType(StandardTypes.BIGINT)
-        public static long bad(@Nullable @SqlType(StandardTypes.DOUBLE) Double value)
-        {
-            return 0;
-        }
-    }
-
     @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Method .* has @IsNull parameter that does not follow a @SqlType parameter")
     public void testParameterWithConnectorAndIsNull()
     {
@@ -255,7 +239,7 @@ public class TestScalarValidation
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class, expectedExceptionsMessageRegExp = "Method .* uses @IsNull following a parameter with boxed primitive type: Long")
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = "Method .* has parameter expected to use USE_NULL_FLAG or RETURN_NULL_ON_NULL null convention\\. Parameter type is unexpected: Long")
     public void testParameterWithBoxedPrimitiveIsNull()
     {
         extractScalars(ParameterWithBoxedPrimitiveIsNull.class);
@@ -265,7 +249,7 @@ public class TestScalarValidation
     {
         @ScalarFunction
         @SqlType(StandardTypes.BIGINT)
-        public static long bad(@SqlNullable @SqlType(StandardTypes.BIGINT) Long value, @IsNull boolean isNull)
+        public static long bad(@SqlType(StandardTypes.BIGINT) Long value, @IsNull boolean isNull)
         {
             return 0;
         }
