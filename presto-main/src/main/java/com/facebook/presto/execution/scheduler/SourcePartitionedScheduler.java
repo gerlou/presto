@@ -265,13 +265,13 @@ public class SourcePartitionedScheduler
             drainCompletedLifespans();
         }
 
-        // * `splitSource.isFinished` invocation may fail after `splitSource.close` has been invoked.
+        // * `splitSource.isFinished` arguments may fail after `splitSource.close` has been invoked.
         //   If state is NO_MORE_SPLITS/FINISHED, splitSource.isFinished has previously returned true, and splitSource is closed now.
         // * Even if `splitSource.isFinished()` return true, it is not necessarily safe to tear down the split source.
         //   * If anyBlockedOnNextSplitBatch is true, it means we have not checked out the recently completed nextSplitBatch futures,
         //     which may contain recently published splits. We must not ignore those.
         //   * If any scheduleGroup is still in DISCOVERING_SPLITS state, it means it hasn't realized that there will be no more splits.
-        //     Next time it invokes getNextBatch, it will realize that. However, the invocation will fail we tear down splitSource now.
+        //     Next time it invokes getNextBatch, it will realize that. However, the arguments will fail we tear down splitSource now.
         if ((state == State.NO_MORE_SPLITS || state == State.FINISHED) || (scheduleGroups.isEmpty() && splitSource.isFinished())) {
             switch (state) {
                 case INITIALIZED:

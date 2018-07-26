@@ -15,6 +15,7 @@ package com.facebook.presto.operator.annotations;
 
 import com.facebook.presto.metadata.BoundVariables;
 import com.facebook.presto.metadata.FunctionRegistry;
+import com.facebook.presto.spi.InvocationConvention;
 import com.facebook.presto.spi.function.FunctionDependency;
 import com.facebook.presto.spi.function.OperatorDependency;
 import com.facebook.presto.spi.function.TypeParameter;
@@ -88,7 +89,7 @@ public interface ImplementationDependency
         private Factory()
         {}
 
-        public static ImplementationDependency createDependency(Annotation annotation, Set<String> literalParameters)
+        public static ImplementationDependency createDependency(Annotation annotation, Set<String> literalParameters, InvocationConvention invocationConvention)
         {
             if (annotation instanceof TypeParameter) {
                 return new TypeImplementationDependency(((TypeParameter) annotation).value());
@@ -103,7 +104,8 @@ public interface ImplementationDependency
                         parseTypeSignature(function.returnType(), literalParameters),
                         Arrays.stream(function.argumentTypes())
                                 .map(signature -> parseTypeSignature(signature, literalParameters))
-                                .collect(toImmutableList()));
+                                .collect(toImmutableList()),
+                        invocationConvention);
             }
             if (annotation instanceof OperatorDependency) {
                 OperatorDependency operator = (OperatorDependency) annotation;
@@ -112,7 +114,8 @@ public interface ImplementationDependency
                         parseTypeSignature(operator.returnType(), literalParameters),
                         Arrays.stream(operator.argumentTypes())
                                 .map(signature -> parseTypeSignature(signature, literalParameters))
-                                .collect(toImmutableList()));
+                                .collect(toImmutableList()),
+                        invocationConvention);
             }
 
             throw new IllegalArgumentException("Unsupported annotation " + annotation.getClass().getSimpleName());

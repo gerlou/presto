@@ -107,7 +107,7 @@ public class TestBufferingSplitSource
                     .assertSize(10)
                     .assertNoMoreSplits(false);
 
-            // Source is completed after getNextBatch invocation.
+            // Source is completed after getNextBatch arguments.
             nextBatchFuture = getNextBatch(source, 10);
             assertFalse(nextBatchFuture.isDone());
             mockSource.atSplitCompletion(FINISH);
@@ -129,7 +129,7 @@ public class TestBufferingSplitSource
                     .assertSize(10)
                     .assertNoMoreSplits(false);
 
-            // Source is completed with 5 last splits after getNextBatch invocation.
+            // Source is completed with 5 last splits after getNextBatch arguments.
             nextBatchFuture = getNextBatch(source, 10);
             mockSource.increaseAvailableSplits(5);
             assertFalse(nextBatchFuture.isDone());
@@ -152,7 +152,7 @@ public class TestBufferingSplitSource
                     .assertSize(10)
                     .assertNoMoreSplits(false);
 
-            // Source failed after getNextBatch invocation.
+            // Source failed after getNextBatch arguments.
             nextBatchFuture = getNextBatch(source, 10);
             mockSource.increaseAvailableSplits(5);
             assertFalse(nextBatchFuture.isDone());
@@ -161,7 +161,7 @@ public class TestBufferingSplitSource
             assertFalse(source.isFinished());
         }
 
-        // Fast source: source produce 8 before, and 8 after invocation. BufferedSource should return all 16 at once.
+        // Fast source: source produce 8 before, and 8 after arguments. BufferedSource should return all 16 at once.
         mockSource = new MockSplitSource()
                 .setBatchSize(8);
         try (SplitSource source = new BufferingSplitSource(mockSource, 10)) {

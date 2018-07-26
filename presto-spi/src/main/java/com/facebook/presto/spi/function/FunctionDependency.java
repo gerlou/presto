@@ -13,9 +13,12 @@
  */
 package com.facebook.presto.spi.function;
 
+import com.facebook.presto.spi.InvocationConvention;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import static com.facebook.presto.spi.InvocationConvention.InvocationReturnConvention.FAIL_ON_NULL;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -28,4 +31,14 @@ public @interface FunctionDependency
     String returnType();
 
     String[] argumentTypes();
+
+    Convention convention() default @Convention($notSpecified = true, arguments = {}, result = FAIL_ON_NULL);
+
+    public static @interface Convention {
+        InvocationConvention.InvocationArgumentConvention[] arguments();
+        InvocationConvention.InvocationReturnConvention result();
+        boolean session() default false;
+
+        boolean $notSpecified() default false;
+    }
 }

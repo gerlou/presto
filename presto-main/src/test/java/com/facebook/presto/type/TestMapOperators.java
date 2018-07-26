@@ -872,7 +872,7 @@ public class TestMapOperators
         expectedNullValueMap.put("y", null);
         assertFunction("map_from_entries(ARRAY[('x', null), ('y', null)])", mapType(createVarcharType(1), UNKNOWN), expectedNullValueMap);
 
-        // invalid invocation
+        // invalid arguments
         assertInvalidFunction("map_from_entries(ARRAY[('a', 1), ('a', 2)])", "Duplicate keys (a) are not allowed");
         assertInvalidFunction("map_from_entries(ARRAY[(1, 1), (1, 2)])", "Duplicate keys (1) are not allowed");
         assertInvalidFunction("map_from_entries(ARRAY[(1.0, 1), (1.0, 2)])", "Duplicate keys (1.0) are not allowed");
@@ -913,7 +913,7 @@ public class TestMapOperators
                         "y", ImmutableList.of(2.0, 2.5),
                         "z", singletonList(null)));
 
-        // invalid invocation
+        // invalid arguments
         assertInvalidFunction("multimap_from_entries(ARRAY[(null, 1), (null, 2)])", "map key cannot be null");
         assertInvalidFunction("multimap_from_entries(ARRAY[null])", "map entry cannot be null");
         assertInvalidFunction("multimap_from_entries(ARRAY[(1, 2), null])", "map entry cannot be null");

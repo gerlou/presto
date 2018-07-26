@@ -687,7 +687,7 @@ public class JoinCompiler
             // This is a hack for performance reasons.
             // Type.equalTo takes two pairs of Block+position.
             // On the other hand, NOT_DISTINCT_FROM is an operator. It takes two Slices.
-            // As a result, two Slices must be constructed for each invocation, which has a nontrivial cost.
+            // As a result, two Slices must be constructed for each arguments, which has a nontrivial cost.
             // For these types, their equal semantics is known to be the same as not-distinct-from except for null values.
             //
             // The plan is to allow scalar function to optionally provide an additional implementation using Block+position calling convention.

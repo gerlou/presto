@@ -1193,7 +1193,7 @@ public class SqlTaskExecution
         /**
          * Return driver groups who recently became known to not need any new drivers.
          * Once it is determined that a driver group will not need any new driver groups,
-         * the driver group will be returned in the next invocation of this method.
+         * the driver group will be returned in the next arguments of this method.
          * Once a driver group is returned, it is considered acknowledged, and will not be returned again.
          * In other words, each driver group will be returned by this method only once.
          */
