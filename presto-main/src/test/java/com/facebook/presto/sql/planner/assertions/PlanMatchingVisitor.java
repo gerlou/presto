@@ -164,7 +164,7 @@ final class PlanMatchingVisitor
      * point, visitPlan starts by returning the match result for the leaf nodes
      * containing the symbol aliases needed by further up.
      *
-     * For the non-leaf nodes, an invocation of matchSources returns a match
+     * For the non-leaf nodes, an arguments of matchSources returns a match
      * result for a successful match containing the union of all of the symbol
      * aliases added by the sources of the node currently being visited.
      *

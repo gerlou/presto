@@ -406,8 +406,8 @@ class HiveSplitSource
                 // Side note 1: In such a case, it doesn't actually matter which one gets to claim it's the last.
                 //              But having both claim they are the last would be a surprising behavior.
                 // Side note 2: One could argue that the isEmpty check is overly conservative.
-                //              The caller of getNextBatch will likely need to make an extra invocation.
-                //              But an extra invocation likely doesn't matter.
+                //              The caller of getNextBatch will likely need to make an extra arguments.
+                //              But an extra arguments likely doesn't matter.
                 return new ConnectorSplitBatch(splits, splits.isEmpty() && queues.isFinished(bucketNumber));
             }
             else {

@@ -32,9 +32,9 @@ public interface ConnectorSplitSource
     /**
      * Returns whether any more {@link ConnectorSplit} may be produced.
      *
-     * This method should only be called when there has been no invocation of getNextBatch,
+     * This method should only be called when there has been no arguments of getNextBatch,
      * or result Future of previous getNextBatch is done.
-     * Calling this method at other time is not useful because the contract of such an invocation
+     * Calling this method at other time is not useful because the contract of such an arguments
      * will be inherently racy.
      */
     boolean isFinished();

@@ -16,6 +16,7 @@ package com.facebook.presto.operator.annotations;
 import com.facebook.presto.metadata.BoundVariables;
 import com.facebook.presto.metadata.FunctionRegistry;
 import com.facebook.presto.metadata.Signature;
+import com.facebook.presto.spi.InvocationConvention;
 import com.facebook.presto.spi.type.TypeManager;
 
 import java.lang.invoke.MethodHandle;
@@ -27,10 +28,12 @@ public abstract class ScalarImplementationDependency
         implements ImplementationDependency
 {
     private final Signature signature;
+    private final InvocationConvention invocationConvention;
 
-    protected ScalarImplementationDependency(Signature signature)
+    protected ScalarImplementationDependency(Signature signature, InvocationConvention invocationConvention)
     {
         this.signature = requireNonNull(signature, "signature is null");
+        this.invocationConvention = invocationConvention;
     }
 
     public Signature getSignature()
@@ -42,6 +45,11 @@ public abstract class ScalarImplementationDependency
     public MethodHandle resolve(BoundVariables boundVariables, TypeManager typeManager, FunctionRegistry functionRegistry)
     {
         Signature signature = applyBoundVariables(this.signature, boundVariables, this.signature.getArgumentTypes().size());
-        return functionRegistry.getScalarFunctionImplementation(signature).getMethodHandle();
+        if (invocationConvention != null) {
+            return functionRegistry.getFunctionInvokerProvider().createFunctionInvoker(signature, invocationConvention).methodHandle();
+        }
+        else {
+            return functionRegistry.getScalarFunctionImplementation(signature).getMethodHandle();
+        }
     }
 }

@@ -127,7 +127,7 @@ public class MockSplitSource
         }
         checkArgument(Lifespan.taskWide().equals(lifespan));
 
-        checkState(nextBatchFuture.isDone(), "concurrent getNextBatch invocation");
+        checkState(nextBatchFuture.isDone(), "concurrent getNextBatch arguments");
         nextBatchFuture = SettableFuture.create();
         nextBatchMaxSize = maxSize;
         nextBatchInvocationCount++;

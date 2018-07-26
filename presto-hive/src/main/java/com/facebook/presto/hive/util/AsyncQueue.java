@@ -141,8 +141,8 @@ public class AsyncQueue<T>
      * Invoke {@code function} with up to {@code maxSize} elements removed from the head of the queue,
      * and insert elements in the return value to the tail of the queue.
      * <p>
-     * If no element is currently available, invocation of {@code function} will be deferred until some
-     * element is available, or no more elements will be. Spurious invocation of {@code function} is
+     * If no element is currently available, arguments of {@code function} will be deferred until some
+     * element is available, or no more elements will be. Spurious arguments of {@code function} is
      * possible.
      * <p>
      * Insertion through return value of {@code function} will be effective even if {@link #finish()} has been invoked.

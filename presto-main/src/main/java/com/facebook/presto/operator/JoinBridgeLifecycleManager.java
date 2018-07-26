@@ -171,7 +171,7 @@ public class JoinBridgeLifecycleManager<T>
 
         /**
          * @param outerPositionIteratorFutureFunction The function returns a Future that will present OuterPositionIterator when ready.
-         *   The function is invoked once probe has finished. However, the build might not have finished at the time of invocation.
+         *   The function is invoked once probe has finished. However, the build might not have finished at the time of arguments.
          */
         public PerLifespanData(JoinType joinType, int factoryCount, T joinBridge, Consumer<T> destroy, Function<T, ListenableFuture<OuterPositionIterator>> outerPositionIteratorFutureFunction)
         {

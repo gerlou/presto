@@ -17,6 +17,7 @@ import com.facebook.presto.spi.ConnectorSession;
 import com.google.common.collect.ImmutableList;
 
 import java.lang.invoke.MethodHandle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,7 +61,7 @@ public final class ScalarFunctionImplementation
     /**
      * @param choices - must be ordered from generic to specific.
      * First choice is the default choice, which is the choice that is returned when legacy access method is used.
-     * The default choice must be usable for any invocation.
+     * The default choice must be usable for any arguments.
      * @param deterministic
      */
     public ScalarFunctionImplementation(List<ScalarImplementationChoice> choices, boolean deterministic)
@@ -106,6 +107,8 @@ public final class ScalarFunctionImplementation
         private final List<ArgumentProperty> argumentProperties;
         private final MethodHandle methodHandle;
         private final Optional<MethodHandle> instanceFactory;
+        private final boolean hasSession;
+        private final List<NullConvention> nullConventionList;
 
         public ScalarImplementationChoice(
                 boolean nullable,
@@ -125,6 +128,7 @@ public final class ScalarFunctionImplementation
             }
 
             List<Class<?>> parameterList = methodHandle.type().parameterList();
+            boolean hasSession = false;
             if (parameterList.contains(ConnectorSession.class)) {
                 checkArgument(parameterList.stream().filter(ConnectorSession.class::equals).count() == 1, "function implementation should have exactly one ConnectorSession parameter");
                 if (!instanceFactory.isPresent()) {
@@ -133,7 +137,10 @@ public final class ScalarFunctionImplementation
                 else {
                     checkArgument(parameterList.get(1) == ConnectorSession.class, "ConnectorSession must be the second argument when instanceFactory is present");
                 }
+                hasSession = true;
             }
+            this.hasSession = hasSession;
+            this.nullConventionList = getNullConventionList();
         }
 
         public boolean isNullable()
@@ -141,9 +148,23 @@ public final class ScalarFunctionImplementation
             return nullable;
         }
 
+        public List<ArgumentProperty> getArgumentProperties()
+        {
+            return argumentProperties;
+        }
+
         public ArgumentProperty getArgumentProperty(int argumentIndex)
         {
             return argumentProperties.get(argumentIndex);
+        }
+
+        public List<NullConvention> getNullConventionList()
+        {
+            List<NullConvention> nullConventionList = new ArrayList<NullConvention>();
+            for (ArgumentProperty argumentProperty : argumentProperties) {
+                nullConventionList.add(argumentProperty.getNullConvention());
+            }
+            return nullConventionList;
         }
 
         public MethodHandle getMethodHandle()
@@ -154,6 +175,11 @@ public final class ScalarFunctionImplementation
         public Optional<MethodHandle> getInstanceFactory()
         {
             return instanceFactory;
+        }
+
+        public boolean hasSession()
+        {
+            return hasSession;
         }
     }
 

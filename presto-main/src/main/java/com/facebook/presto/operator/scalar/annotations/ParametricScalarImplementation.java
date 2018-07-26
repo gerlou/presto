@@ -25,10 +25,13 @@ import com.facebook.presto.operator.scalar.ScalarFunctionImplementation.Argument
 import com.facebook.presto.operator.scalar.ScalarFunctionImplementation.NullConvention;
 import com.facebook.presto.operator.scalar.ScalarFunctionImplementation.ScalarImplementationChoice;
 import com.facebook.presto.spi.ConnectorSession;
+import com.facebook.presto.spi.InvocationConvention;
 import com.facebook.presto.spi.block.Block;
 import com.facebook.presto.spi.function.BlockIndex;
 import com.facebook.presto.spi.function.BlockPosition;
+import com.facebook.presto.spi.function.FunctionDependency;
 import com.facebook.presto.spi.function.IsNull;
+import com.facebook.presto.spi.function.OperatorDependency;
 import com.facebook.presto.spi.function.SqlNullable;
 import com.facebook.presto.spi.function.SqlType;
 import com.facebook.presto.spi.function.TypeParameter;
@@ -198,16 +201,21 @@ public class ParametricScalarImplementation
             this.choices.add(choice);
         }
         Collections.sort(choices, ParametricScalarImplementationChoice::compareTo);
+
+        for (ArgumentProperty argumentProperty : choices.get(0).argumentProperties) {
+            if (argumentProperty.getArgumentType() == VALUE_TYPE && argumentProperty.getNullConvention() != null) {
+                checkArgument(argumentProperty.getNullConvention() != BLOCK_AND_POSITION);
+            }
+        }
     }
 
     public SpecializedSignature getSpecializedSignature()
     {
-        SpecializedSignature specializedSignature = new SpecializedSignature(
+        return new SpecializedSignature(
                 signature,
                 argumentNativeContainerTypes,
                 specializedTypeParameters,
                 returnNativeContainerType);
-        return specializedSignature;
     }
 
     public static final class ParametricScalarImplementationChoice
@@ -437,7 +445,46 @@ public class ParametricScalarImplementation
                 if (implementationDependency.isPresent()) {
                     // check if only declared typeParameters and literalParameters are used
                     validateImplementationDependencyAnnotation(method, implementationDependency.get(), typeParameterNames, literalParameters);
-                    dependencies.add(createDependency(implementationDependency.get(), literalParameters));
+                    InvocationConvention invocationConvention = null;
+
+                    if (implementationDependency.get() instanceof OperatorDependency) {
+                        if (!((OperatorDependency) implementationDependency.get()).convention().$notSpecified()) {
+                            OperatorDependency.Convention convention = ((OperatorDependency) implementationDependency.get()).convention();
+                            List<InvocationConvention.InvocationArgumentConvention> argumentConventions = new ArrayList<InvocationConvention.InvocationArgumentConvention>();
+                            for (InvocationConvention.InvocationArgumentConvention argumentConvention : convention.arguments()) {
+                                argumentConventions.add(argumentConvention);
+                            }
+                            invocationConvention = new InvocationConvention(argumentConventions, convention.result(), convention.session());
+                        }
+                        /*
+                        OperatorDependency.Convention convention = Stream.of(implementationDependency)
+                                .filter(OperatorDependency.Convention.class::isInstance)
+                                .map(OperatorDependency.Convention.class::cast)
+                                .findFirst()
+                                .get();
+                                //.orElseThrow(() -> new IllegalArgumentException(format("Method [%s] is missing @Convention annotation for operator dependency", method)));
+
+                        if (!convention.$notSpecified()) {
+                            List<InvocationConvention.InvocationArgumentConvention> argumentConventions = new ArrayList<InvocationConvention.InvocationArgumentConvention>();
+                            for (InvocationConvention.InvocationArgumentConvention argumentConvention : convention.arguments()) {
+                                argumentConventions.add(argumentConvention);
+                            }
+                            invocationConvention = new InvocationConvention(argumentConventions, convention.result(), convention.session());
+                        }
+                        */
+                    }
+                    else if (implementationDependency.get() instanceof FunctionDependency) {
+                        if (!((FunctionDependency) implementationDependency.get()).convention().$notSpecified()) {
+                            FunctionDependency.Convention convention = ((FunctionDependency) implementationDependency.get()).convention();
+                            List<InvocationConvention.InvocationArgumentConvention> argumentConventions = new ArrayList<InvocationConvention.InvocationArgumentConvention>();
+                            for (InvocationConvention.InvocationArgumentConvention argumentConvention : convention.arguments()) {
+                                argumentConventions.add(argumentConvention);
+                            }
+                            invocationConvention = new InvocationConvention(argumentConventions, convention.result(), convention.session());
+                        }
+                    }
+                    dependencies.add(createDependency(implementationDependency.get(), literalParameters, invocationConvention));
+
                     i++;
                 }
                 else {
@@ -562,7 +609,7 @@ public class ParametricScalarImplementation
                 if (annotation instanceof TypeParameter) {
                     checkTypeParameters(parseTypeSignature(((TypeParameter) annotation).value()), typeParameterNames, method);
                 }
-                constructorDependencies.add(createDependency(annotation, literalParameters));
+                constructorDependencies.add(createDependency(annotation, literalParameters, null));
             }
             MethodHandle result = constructorMethodHandle(FUNCTION_IMPLEMENTATION_ERROR, constructor);
             // Change type of return value to Object to make sure callers won't have classloader issues

@@ -489,7 +489,7 @@ public final class FunctionAssertions
             }
 
             if (maxRetainedSize >= 1048576) {
-                fail(format("The retained size of cached instance of function invocation is likely unbounded: %s", projection));
+                fail(format("The retained size of cached instance of function arguments is likely unbounded: %s", projection));
             }
         }
     }
